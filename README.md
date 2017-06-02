@@ -1,38 +1,18 @@
-# estudos-react
-material de estudos sobre react
+# Material de estudos sobre REACT
 
-iniciando o projeto com webpack
+O [React](https://facebook.github.io/react/), é uma lib para construção de interfaces, feita pelo pessoal do facebook e muito usada pela comunidade.
 
-1º -> inciar o projeto npm init
-2º -> criar o arquivo webpack.config.js
-<b> webpack.config.js </b>
-````js
-'use strict'
+## Resumo dos estudos
 
-const path = require('path')
-
-module.exports = {
-    entry : path.join(__dirname, 'src', 'index'),
-    output: {
-        path: path.join(__dirname, 'dist'),
-        filename: 'bundle.js'
-    }
-}
+primeiro de tudo vamos instalar o create react app, que é uma ferramente para auxiliar na configuração inicial de uma aplicação react, lembrando que o react é composto por um conjunto de tecnologias e não é algo trivial fazer a configuração do zero, os comandos para instalar o create react app são:
 ````
-3º -> instalar webpack global - npm install -g webpack
-4º -> criar index.html
-````html
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <title></title>
-        <meta charset="UTF-8">
-    </head>
-    <body>
-        
-        <script src="/dist/bindle.js"></script>
-    </body>
-</html>
+1º - npm install -g create-react-app
+
+2º - create-react-app nome-do-app
+3º - cd nome-do-app
+4º - npm start
 ````
-5º -> instalar o webpack dev server - npm install --save-dev webpack-dev-server
-6º -> 
+usando o comando *create-react-app* vamos ter a criação de uma série de arquivos que fazem parte da configuração do react, na pasta *src* temos a estrutura da aplicação, o arquivo *index.html* é o ponto de partida junto com o arquivo *index.js* no arquivo *index.js* podemos ver uma chamada utilizando JSX ( html direto no código javascript ).
+````
+
+````
