@@ -14,5 +14,13 @@ primeiro de tudo vamos instalar o create react app, que é uma ferramente para a
 ````
 usando o comando *create-react-app* vamos ter a criação de uma série de arquivos que fazem parte da configuração do react, na pasta *src* temos a estrutura da aplicação, o arquivo *index.html* é o ponto de partida junto com o arquivo *index.js* no arquivo *index.js* podemos ver uma chamada utilizando JSX ( html direto no código javascript ).
 ````
+import React, {Component} from 'react';
+import ReactDom from 'react-dom';
+import App from './App';
+import './index.css';
 
+ReactDOM.render(
+  <App />,
+  document.getElementById('root')
+);
 ````
