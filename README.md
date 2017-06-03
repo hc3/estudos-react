@@ -47,7 +47,7 @@ export default App;
 app.js é um component, que é importado no index e pode ser exibido na tela.
 
 
-### Estado do Component 3.1
+### Estado do Component
 o estado pode ser qualquer conjunto de informações que serão usadas pelo component, o estado vai estar na variável state e é nesse variável que vamos guardar o estado, vale lembrar que essa variável é observada pelo react, para isso vamos incializar o contrutor com state.
 ````js
 ...
@@ -106,3 +106,62 @@ componentDidMount() {
 }
 ````
 esse método é chamado quando o component for criado e nesse momento é feita a requisição ajax que vai alimentar o state do component, além do DidMount existe também o WillMount que faz a chamada antes da criação do component, outra coisa que precisamos é que quando a *lista* em state mudar, o state precisa saber disso e precisa renderizar o component novamente com o state atualizado, é como se fosse um watcher que fica observando e quando state muda ele chama o render e o component é atualizado, o this.setState faz essa mágica acontecer, o .bind(this) é pra dizer ao jQuery que o this é referente ao react.
+
+### Ciclo de vida do React
+
+existem outras funções do ciclo de vida do react como componentDidMount ou componentWillMount sendo o DidMount a função chamada depois do component ser renderizado o WillMount é chamado antes da renderização do component.
+
+### Evento
+
+quando clicamos em um botão do form precisamos disparar um evento que normalmente faz uma requisição ajax enviando os inputs do form para o servidor para isso precisamos criar um form e colocar a chamada de uma função dessa forma:
+App.js
+````js
+
+class App extends Component {
+
+  constructor() {
+    super()
+    this.state = {
+      lista:[],
+      nome:'',
+      email:'',
+      senha:''
+    };
+    this.enviarForm = this.enviaForm.bind(this);
+  }
+
+  componentDidMount() {
+    ...
+  }
+
+  enviarForm(evento) {
+    evento.preventDefault(); // -> INFORMA AO REACT QUE NÃO QUER RECARREGAR A PÁGINA APÓS O ENVIO DO FORM
+
+    $.ajax({
+      url:'http://localhost:8000/api/data',
+      contentType:'application/json',
+      dataType:'json',
+      type:'post',
+      data:JSON.stringify({nome:this.state.nome,email:this.state.email,senha:this.state.senha}),
+      success:function(data) {
+
+      }.bind(this),
+      error:function(data) {
+        
+      }
+    })
+  }
+
+  render() {
+    <form onSubmit={this.nomeFunction} method="post">
+    ...
+      <input type="text" name="nome" id="nome" value="this.state.nome" onChange={this.setNome}/>
+      <input type="text" name="email" id="email" value="this.state.email" onChange={this.setEmail}/>
+      <input type="text" name="senha" id="senha" value="this.state.senha" onChange={this.setSenha}/>
+    </form>
+  }
+}
+````
+com o onSubmit podemos passar funções através do this para o formulário na função usando *preventDefault()* no evento fazemos com que a página não seja recarregada, a função enviarForm é declarada no construtor usando .bind(this) para usar o this do react nos inputs adicionamos value=" variável do state" 
+
+4.2
