@@ -5,6 +5,7 @@ import './css/side-menu.css';
 import './App.css';
 
 class App extends Component {
+
   render() {
     return (
       <div id="layout">
@@ -36,7 +37,7 @@ class App extends Component {
                 <h2>Aqui fica um sub titulo</h2>
             </div>
             <div className="content">
-
+                
             </div>
         </div>
       </div>
