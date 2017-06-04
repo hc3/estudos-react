@@ -179,6 +179,4 @@ class App extends Component {
 ````
 com o onSubmit podemos passar funções através do this para o formulário na função usando *preventDefault()* no evento, fazemos com que a página não seja recarregada, a função enviarForm é declarada no construtor usando .bind(this) para usar o this do react nos inputs adicionamos value=" variável do state" com o onChange capturamentos a mudança da variável e aplicamos o setCampo, nesse momento vamos criar também três funções para setar valor na variável usando o setState, e vamos atribuir o bind lá no constructor, o próximo passo é atualizar a tabela após da inserção de um novo registro e para isso temos *this.setState({lista:data})* no success.
 
-### Criando o primeiro component
-
-5.1
+### Criando o primeiro component 4.4
