@@ -451,3 +451,4 @@ export class TatabelaAutores exnteds Compoent {
 }
 ````
 o arquivo *Autor.js* vai ficar com a tabela e o formulário para isso criamos duas classes para representa-los, 
+5.2
