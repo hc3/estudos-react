@@ -52,6 +52,7 @@ o estado pode ser qualquer conjunto de informações que serão usadas pelo comp
 ````js
 ...
 
+
 class App extends Component {
   constructor() {
     super();
@@ -180,3 +181,273 @@ class App extends Component {
 com o onSubmit podemos passar funções através do this para o formulário na função usando *preventDefault()* no evento, fazemos com que a página não seja recarregada, a função enviarForm é declarada no construtor usando .bind(this) para usar o this do react nos inputs adicionamos value=" variável do state" com o onChange capturamentos a mudança da variável e aplicamos o setCampo, nesse momento vamos criar também três funções para setar valor na variável usando o setState, e vamos atribuir o bind lá no constructor, o próximo passo é atualizar a tabela após da inserção de um novo registro e para isso temos *this.setState({lista:data})* no success.
 
 ### Criando o primeiro component 4.4
+
+no input temos todo o css com muita repetição de código, no react quando tivermos essa situaçao devemos sempre tentar componentizar, vamos criar um component para o input conseguindo assim uma maior reutilizaçao do codigo, para isso vamos criar um novo component chamado InputCustomizado na pasta */components/InputCustomizado.js*, quando queremos passar parâmetros para um component usamos o *props*, o atributo props guarda todos os valores que sao passados para o component
+
+o input Customizado vai ter o seguinte código:
+
+*/components/InputCustomizado.js*
+````js
+import React, {Component} from 'react';
+
+export default class InputCustomizado extends Component {
+
+  render() {
+    return (
+      <div className="pure-control-group">
+        <label htmlFor="{this.props.id}">{this.props.label}</label>
+        <input id="{this.props.id}" type="{this.props.type}" name="{this.props.name}" value={this.props.value} onChange="this.props.onChange} />
+      </div>
+    );
+  }
+}
+
+
+````
+importamos o React + Component para criar um novo component vamos ter a função *render()* que retorna o html , em App.js precisamos fazer a importação do novo component fazendo:
+*App.js*
+````js
+import React, { Component } from 'react';
+import './css/pure-min.css';
+import './css/side-menu.css';
+import $ from 'jquery';
+import InputCustomizado from './components/InputCustomizado';
+
+class App extends Component {
+  constructor() {
+    super();
+    this.state = {
+      lista:[],
+      nome:'',
+      email:'',
+      senha:'',
+    };
+    this.enviaForm = this.enviaForm.bind(this);
+    this.setNome = this.setNome.bind(this);
+    this.setEmail = this.setEmail.bind(this);
+    this.setSenha = this.setSenha.bind(this);
+  }
+
+  componentDidMount() {
+    $.ajax({
+      url:'http://localhost:8000/api/teste',
+      dataType:'json',
+      success:function(data) {
+        this.setState({lista:resposta})
+      }.bind(this)
+    })
+  }
+
+  enviaForm(evento) {
+    evento.preventDefault(); 
+
+    $.ajax({
+      url:'http://localhost:8000/api/data',
+      contentType:'application/json',
+      dataType:'json',
+      type:'post',
+      data:JSON.stringify({nome:this.state.nome,email:this.state.email,senha:this.state.senha}),
+      success:function(data) {
+        this.setState({lista:data})
+      }.bind(this),
+      error:function(err) {
+        console.log(err)
+      }
+    })
+  }
+
+  setNome(evento) {
+    this.setState({nome:evento.target.value})
+  }
+
+  setEmail(evento) {
+    this.setState({email:evento.target.value})
+  }
+
+  setSenha(evento) {
+    this.setState({senha:evento.target.value})
+  }
+
+  render() {
+    return (
+      <div id="layout">
+        ...
+          <div id="main">
+            <div className="header">
+              <h1>Cadastro de Autores</h1>
+            </div>
+            <div className="content" id="content">
+              <div className="pure-form pure-form-aligned">
+                <form className="pure-form pure-form-aligned" onSubmit={this.enviaForm} method="post">
+                  <InputCustomizado id="nome" type="text" name="nome" value="this.state.nome" onChange="this.setNome" label="Nome"/>
+                  <InputCustomizado id="email" type="text" name="email" value="this.state.email" onChange="this.setEmail" label="Email"/>
+                  <InputCustomizado id="senha" type="text" name="senha" value="this.state.senha" onChange="this.setSenha" label="Senha"/>
+
+                  <div className="pure-control-group">
+                    <label></label>
+                    <button type="submit" className="pure-button pure-button-primary">Gravar</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+          </div>
+
+      </div>
+    )
+  }
+}
+````
+
+### Refatorando código do App.js
+
+vamos refatorar o *App.js* organizando melhor o código deixando cada um com sua respectiva responsabilidade, para isso o que precisamos é de um component com o formulário do autor e com a tabela de autores para isso vamos refatorar *App.js* e criar o *Autor.js*.
+
+*App.js*
+````js
+import React, { Component } from 'react';
+import './css/pure-min.css';
+import './css/side-menu.css';
+import {FormularioAutor, TabelaAutores} from './Autor';
+
+class App extends Component {
+
+  render() {
+    return (
+      <div id="layout">
+        <a href="#menu" id="menuLink" className="menu-link">
+          <span></span>
+        </a>
+        
+        <div id="menu">
+          <div className="pure-menu">
+            ....
+          </div>
+        </div>
+
+        <div id="main">
+          <div className="header">
+            <h1>Cadastro de Autores</h1>
+          </div>
+          <div className="content" id="content">
+            <FormularioAutor/>
+            <TabelaAutores />
+        </div>
+      </div>
+    )
+  }
+}
+````
+
+
+*Autor.js*
+````js
+import React, { Component } from 'react';
+import $ from 'jquery';
+import InputCustomizado from './components/InputCustomizado';
+
+export class FormularioAutor extends Component {
+  constructor() {
+    super();
+    this.state = {nome:'',email:'',senha:''};
+    this.enviaForm = this.enviaForm.bind(this);
+    this.setNome = this.setNome.bind(this);
+    this.setEmail = this.setEmail.bind(this);
+    this.setSenha = this.setSenha.bind(this);
+  }
+
+  enviaForm(evento) {
+    evento.preventDefault(); 
+
+    $.ajax({
+      url:'http://localhost:8000/api/data',
+      contentType:'application/json',
+      dataType:'json',
+      type:'post',
+      data:JSON.stringify({nome:this.state.nome,email:this.state.email,senha:this.state.senha}),
+      success:function(data) {
+        this.setState({lista:data})
+      }.bind(this),
+      error:function(err) {
+        console.log(err)
+      }
+    })
+  }
+
+  setNome(evento) {
+    this.setState({nome:evento.target.value})
+  }
+
+  setEmail(evento) {
+    this.setState({email:evento.target.value})
+  }
+
+  setSenha(evento) {
+    this.setState({senha:evento.target.value})
+  }
+
+  render() {
+    return (
+      <div className="pure-form pure-form-aligned">
+        <form className="pure-form pure-form-aligned" onSubmit={this.enviaForm} method="post">
+          <InputCustomizado id="nome" type="text" name="nome" value="this.state.nome" onChange="this.setNome" label="Nome"/>
+          <InputCustomizado id="email" type="text" name="email" value="this.state.email" onChange="this.setEmail" label="Email"/>
+          <InputCustomizado id="senha" type="text" name="senha" value="this.state.senha" onChange="this.setSenha" label="Senha"/>
+
+          <div className="pure-control-group">
+            <label></label>
+            <button type="submit" className="pure-button pure-button-primary">Gravar</button>
+          </div>
+        </form>
+      </div>
+    )
+  }
+
+}
+
+export class TatabelaAutores exnteds Compoent {
+
+  constructor() {
+    super();
+    this.state = {lista:[]}
+  }
+
+  componentDidMount() {
+    $.ajax({
+      url:'http://localhost:8000/api/teste',
+      dataType:'json',
+      success:function(data) {
+        this.setState({lista:resposta})
+      }.bind(this)
+    })
+  }
+
+  render() {
+    return(
+      <div>            
+        <table className="pure-table">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>email</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              this.state.lista.map(function(autor){
+                return (
+                  <tr key={autor.id}>
+                    <td>{autor.nome}</td>
+                    <td>{autor.email}</td>
+                  </tr>
+                );
+              })
+            }
+          </tbody>
+        </table> 
+      </div> 
+    )
+  }
+}
+````
+o arquivo *Autor.js* vai ficar com a tabela e o formulário para isso criamos duas classes para representa-los, 
