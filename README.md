@@ -128,6 +128,9 @@ class App extends Component {
       senha:''
     };
     this.enviarForm = this.enviaForm.bind(this);
+    this.setNome = this.setNome.bind(this);
+    this.setEmail = this.setEmail.bind(this);
+    this.setSenha = this.setSenha.bind(this);
   }
 
   componentDidMount() {
@@ -144,12 +147,24 @@ class App extends Component {
       type:'post',
       data:JSON.stringify({nome:this.state.nome,email:this.state.email,senha:this.state.senha}),
       success:function(data) {
-
+        this.setState({lista:data})
       }.bind(this),
-      error:function(data) {
-        
+      error:function(err) {
+        console.log(err)
       }
     })
+  }
+
+  setNome(evento) {
+    this.setState({nome:evento.target.value})
+  }
+
+  setEmail(evento) {
+    this.setState({email:evento.target.value})
+  }
+
+  setSenha(evento) {
+    this.setState({senha:evento.target.value})
   }
 
   render() {
@@ -162,6 +177,8 @@ class App extends Component {
   }
 }
 ````
-com o onSubmit podemos passar funções através do this para o formulário na função usando *preventDefault()* no evento fazemos com que a página não seja recarregada, a função enviarForm é declarada no construtor usando .bind(this) para usar o this do react nos inputs adicionamos value=" variável do state" 
+com o onSubmit podemos passar funções através do this para o formulário na função usando *preventDefault()* no evento, fazemos com que a página não seja recarregada, a função enviarForm é declarada no construtor usando .bind(this) para usar o this do react nos inputs adicionamos value=" variável do state" com o onChange capturamentos a mudança da variável e aplicamos o setCampo, nesse momento vamos criar também três funções para setar valor na variável usando o setState, e vamos atribuir o bind lá no constructor, o próximo passo é atualizar a tabela após da inserção de um novo registro e para isso temos *this.setState({lista:data})* no success.
 
-4.2
+### Criando o primeiro component
+
+5.1
