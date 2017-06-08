@@ -299,7 +299,7 @@ class App extends Component {
 }
 ````
 
-### Refatorando código do App.js
+### Primeira refatorada do código de App.js
 
 vamos refatorar o *App.js* organizando melhor o código deixando cada um com sua respectiva responsabilidade, para isso o que precisamos é de um component com o formulário do autor e com a tabela de autores para isso vamos refatorar *App.js* e criar o *Autor.js*.
 
@@ -308,7 +308,7 @@ vamos refatorar o *App.js* organizando melhor o código deixando cada um com sua
 import React, { Component } from 'react';
 import './css/pure-min.css';
 import './css/side-menu.css';
-import {FormularioAutor, TabelaAutores} from './Autor';
+import AutorBox from './Autor';
 
 class App extends Component {
 
@@ -329,10 +329,7 @@ class App extends Component {
           <div className="header">
             <h1>Cadastro de Autores</h1>
           </div>
-          <div className="content" id="content">
-            <FormularioAutor/>
-            <TabelaAutores />
-        </div>
+          <AutorBox />
       </div>
     )
   }
@@ -346,7 +343,7 @@ import React, { Component } from 'react';
 import $ from 'jquery';
 import InputCustomizado from './components/InputCustomizado';
 
-export class FormularioAutor extends Component {
+class FormularioAutor extends Component {
   constructor() {
     super();
     this.state = {nome:'',email:'',senha:''};
@@ -366,7 +363,7 @@ export class FormularioAutor extends Component {
       type:'post',
       data:JSON.stringify({nome:this.state.nome,email:this.state.email,senha:this.state.senha}),
       success:function(data) {
-        this.setState({lista:data})
+        this.props.callbackAtualizaListagem(data)
       }.bind(this),
       error:function(err) {
         console.log(err)
@@ -405,22 +402,7 @@ export class FormularioAutor extends Component {
 
 }
 
-export class TatabelaAutores exnteds Compoent {
-
-  constructor() {
-    super();
-    this.state = {lista:[]}
-  }
-
-  componentDidMount() {
-    $.ajax({
-      url:'http://localhost:8000/api/teste',
-      dataType:'json',
-      success:function(data) {
-        this.setState({lista:resposta})
-      }.bind(this)
-    })
-  }
+class TatabelaAutores exnteds Compoent {
 
   render() {
     return(
@@ -434,7 +416,7 @@ export class TatabelaAutores exnteds Compoent {
           </thead>
           <tbody>
             {
-              this.state.lista.map(function(autor){
+              this.props.lista.map(function(autor){
                 return (
                   <tr key={autor.id}>
                     <td>{autor.nome}</td>
@@ -449,6 +431,261 @@ export class TatabelaAutores exnteds Compoent {
     )
   }
 }
+
+export default class AutorBox extends Component {
+
+  constructor() {
+    super();
+    this.state = {lista:[]};
+    this.atualizaListagem = this.atualizaListagem.bind(this);
+  }
+
+  componentDidMount() {
+    $.ajax({
+      url:'http://localhost:8000/api/teste',
+      dataType:'json',
+      success:function(data) {
+        this.setState({lista:resposta})
+      }.bind(this)
+    })
+  }
+
+  atualizaListagem(data) {
+    this.setState({lista:data})
+  }
+
+  render() {
+    return (
+      <div className="content" id="content">
+            <FormularioAutor callbackAtualizaListagem={this.atualizaListagem}/>
+            <TabelaAutores lista={this.state.lista} />
+      </div>
+    )
+  }
+}
 ````
-o arquivo *Autor.js* vai ficar com a tabela e o formulário para isso criamos duas classes para representa-los, 
-5.2
+o arquivo *Autor.js* vai ficar com a tabela e o formulário para isso criamos duas classes para representa-los, exportamos como default a class box que vai agrupar os components como em uma caixa, esse component se comunica com os outros através da variável *props* podemos ver TabelAutores com uma propriedade *lista* que recebe o *state* essa mesma propriedade está disponível na classe TatabelaAutores acessando *this.props.lista*, e essa é uma grande sacada do React, podemos fazer o mesmo com o formulário passando uma propriedade *callbackAtualizaListagem* que recebe uma função que atualiza o *state*, lá no formulário no sucesso do post temos o acesso a essa propriedade *this.props.callbackAtualizaListagem(data)* e fazendo a chamada dessa função.
+-Muito importante perceber que estamos criando propriedades no html que estão acessíveis através da variável *props*, no formulário estamos passando uma assinatura de função que quando é chamada o EnviaForm nem sabe o que é callbackAtualizaListagem, ele apenas faz a chamada.
+-Criar o component box (higher order component) é uma boa prática e muita usada no mercado.
+
+
+### Segunda refatorada do código de App.js
+*App.js*
+````js
+import React, { Component } from 'react';
+import './css/pure-min.css';
+import './css/side-menu.css';
+import AutorBox from './Autor';
+
+class App extends Component {
+
+  render() {
+    return (
+      <div id="layout">
+        <a href="#menu" id="menuLink" className="menu-link">
+          <span></span>
+        </a>
+        
+        <div id="menu">
+          <div className="pure-menu">
+            ....
+          </div>
+        </div>
+
+        <div id="main">
+          <div className="header">
+            <h1>Cadastro de Autores</h1>
+          </div>
+          <AutorBox />
+      </div>
+    )
+  }
+}
+````
+
+
+*Autor.js*
+````js
+import React, { Component } from 'react';
+import $ from 'jquery';
+import InputCustomizado from './components/InputCustomizado';
+import PubSub from 'pubsub-js';
+import TratadorErros from './TratadorErros';
+
+class FormularioAutor extends Component {
+  constructor() {
+    super();
+    this.state = {nome:'',email:'',senha:''};
+    this.enviaForm = this.enviaForm.bind(this);
+    this.setNome = this.setNome.bind(this);
+    this.setEmail = this.setEmail.bind(this);
+    this.setSenha = this.setSenha.bind(this);
+  }
+
+  enviaForm(evento) {
+    evento.preventDefault(); 
+
+    $.ajax({
+      url:'http://localhost:8000/api/data',
+      contentType:'application/json',
+      dataType:'json',
+      type:'post',
+      data:JSON.stringify({nome:this.state.nome,email:this.state.email,senha:this.state.senha}),
+      success:function(data) {
+        PubSub.publish('atualiza-lista-autores',data);
+      }.bind(this),
+      error:function(err) {
+        new TratadorErros().publicaErros(err.responseJSON);
+      }
+    })
+  }
+
+  setNome(evento) {
+    this.setState({nome:evento.target.value})
+  }
+
+  setEmail(evento) {
+    this.setState({email:evento.target.value})
+  }
+
+  setSenha(evento) {
+    this.setState({senha:evento.target.value})
+  }
+
+  render() {
+    return (
+      <div className="pure-form pure-form-aligned">
+        <form className="pure-form pure-form-aligned" onSubmit={this.enviaForm} method="post">
+          <InputCustomizado id="nome" type="text" name="nome" value="this.state.nome" onChange="this.setNome" label="Nome"/>
+          <InputCustomizado id="email" type="text" name="email" value="this.state.email" onChange="this.setEmail" label="Email"/>
+          <InputCustomizado id="senha" type="text" name="senha" value="this.state.senha" onChange="this.setSenha" label="Senha"/>
+
+          <div className="pure-control-group">
+            <label></label>
+            <button type="submit" className="pure-button pure-button-primary">Gravar</button>
+          </div>
+        </form>
+      </div>
+    )
+  }
+
+}
+
+class TatabelaAutores exnteds Compoent {
+
+  render() {
+    return(
+      <div>            
+        <table className="pure-table">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>email</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              this.props.lista.map(function(autor){
+                return (
+                  <tr key={autor.id}>
+                    <td>{autor.nome}</td>
+                    <td>{autor.email}</td>
+                  </tr>
+                );
+              })
+            }
+          </tbody>
+        </table> 
+      </div> 
+    )
+  }
+}
+
+export default class AutorBox extends Component {
+
+  constructor() {
+    super();
+    this.state = {lista:[]};
+  }
+
+  componentDidMount() {
+    $.ajax({
+      url:'http://localhost:8000/api/teste',
+      dataType:'json',
+      success:function(data) {
+        this.setState({lista:resposta})
+      }.bind(this)
+    })
+
+    PubSub.subscribe('atualiza-lista-autores', function(topico,data) {
+      this.setState({lista:data})
+    }.bind(this))
+  }
+
+  render() {
+    return (
+      <div className="content" id="content">
+            <FormularioAutor/>
+            <TabelaAutores lista={this.state.lista} />
+      </div>
+    )
+  }
+}
+````
+
+*TratadorErros.js*
+````js
+import PubSub from 'pubsub-js';
+
+export default class TratadorErros {
+
+  publicaErros(erros) {
+    for(var i=1; i<erros.erros.length; i++) {
+      var erro = erros.errors[i];
+      PubSub.publish('erro-validacao',erro);
+    }
+  }
+}
+
+````
+
+*/components/InputCustomizado.js*
+````js
+import React, {Component} from 'react';
+import PubSub from 'pubsub-js';
+
+export default class InputCustomizado extends Component {
+
+  constructor() {
+    super();
+    this.state = {msgErro:''};
+  }
+
+  componentDidMount() {
+    PubSub.subscribe('erro-validacao',function(topico,erro) {
+      if(erro.field === this.props.name) {
+        this.setState({msgErro:erro.defaultMessage })
+      }
+    }.bind(this));
+  }
+
+  render() {
+    return (
+      <div className="pure-control-group">
+        <label htmlFor="{this.props.id}">{this.props.label}</label>
+        <input id="{this.props.id}" type="{this.props.type}" name="{this.props.name}" value={this.props.value} onChange={this.props.onChange} />
+        <span className="error">{this.state.msgErro}</span>
+      </div>
+    );
+  }
+}
+
+
+````
+Vamos iniciar essa refatoração evoluindo o código com uma nova biblioteca o [PubSubJS](https://github.com/mroderick/PubSubJS) para desacoplar os components com o *npm install --save pubsub-js* e importamos com *import PubSub from 'pubsub-js';* e agora ao cadastrar um novo autor vamos fazer o seguinte *PubSub.publish('atualiza-lista-autores',novaListagem);* usando PubSub com o método publish passando um tópico e a data com agora em *AutorBox* podemos subscribe o mesmo tópico e toda vez que o form for enviando ele vai emitir uma chamada pra todos os subscribe e podemos fazer o seguinte trecho de código.
+````js
+PubSub.subscribe('atualiza-lista-autores', function(topico,data) {
+  this.setState({lista:data})
+})
+````
+5.4 e 5.5 - rever
