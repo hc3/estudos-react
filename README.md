@@ -533,9 +533,14 @@ class FormularioAutor extends Component {
       data:JSON.stringify({nome:this.state.nome,email:this.state.email,senha:this.state.senha}),
       success:function(data) {
         PubSub.publish('atualiza-lista-autores',data);
+        // limpa o form
+        this.setState({nome:'',email:'',senha:''});
       }.bind(this),
       error:function(err) {
         new TratadorErros().publicaErros(err.responseJSON);
+      },
+      beforeSend: function() {
+        PubSub.publish("limpa-erros",{});
       }
     })
   }
@@ -667,6 +672,11 @@ export default class InputCustomizado extends Component {
         this.setState({msgErro:erro.defaultMessage })
       }
     }.bind(this));
+
+    //LIMPA AS MENSAGENS
+    PubSub.subscribe('limpa-erros',function(topico) {    
+        this.setState({msgErro:'' });
+    }.bind(this));
   }
 
   render() {
@@ -688,4 +698,65 @@ PubSub.subscribe('atualiza-lista-autores', function(topico,data) {
   this.setState({lista:data})
 })
 ````
-5.4 e 5.5 - rever
+O uso do PubSub é algo que agrega muito pois com ele temos o controle dos components pelo *estado* , quando fazemos *publish* estamos fazendo os components conversarem, parece muito com o design pattern Observe [ estudar + sobre isso ].
+
+### Configuração do Router
+
+Vamos aprender agora sobre a troca de telas, algo comum em qualquer aplicação se clicamos no menu opção 1 mostra uma view, se clicamos na opção 2 mostra outra view, e assim vai podemos usar o Box para ser a view, para isso vamos usar o [react-route](https://github.com/ReactTraining/react-router)
+*npm install --save react-router* é o comando para instalar o react-router agora vamos para a prática.
+*index.js*
+````js
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App';
+import './index.css';
+import {Router, Route} from 'react-router';
+
+ReactDOM.render(
+  (<Router>
+    <Route path="/" component={App} />
+    <Route path="/outrarota" />
+    <Route path="/terceirarota"/>
+  </Router>),
+  document.getElementById('root')
+);
+
+````
+
+
+*App.js*
+````js
+import React, { Component } from 'react';
+import './css/pure-min.css';
+import './css/side-menu.css';
+import AutorBox from './Autor';
+
+class App extends Component {
+
+  render() {
+    return (
+      <div id="layout">
+        <a href="#menu" id="menuLink" className="menu-link">
+          <span></span>
+        </a>
+        
+        <div id="menu">
+          <div className="pure-menu">
+            ....
+          </div>
+        </div>
+
+        <div id="main">
+          <div className="header">
+            <h1>Cadastro de Autores</h1>
+          </div>
+          <AutorBox />
+      </div>
+    )
+  }
+}
+
+export default App;
+````
+
+stop in 6.2 aplicando o history api.
