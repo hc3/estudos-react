@@ -709,13 +709,14 @@ Vamos aprender agora sobre a troca de telas, algo comum em qualquer aplicação 
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
+import Box1 from './BoxOne';
 import './index.css';
-import {Router, Route} from 'react-router';
+import {Router, Route, browserHistory} from 'react-router';
 
 ReactDOM.render(
-  (<Router>
+  (<Router history={browserHistory}>
     <Route path="/" component={App} />
-    <Route path="/outrarota" />
+    <Route path="/outrarota" component={Box1}/>
     <Route path="/terceirarota"/>
   </Router>),
   document.getElementById('root')
@@ -748,9 +749,8 @@ class App extends Component {
 
         <div id="main">
           <div className="header">
-            <h1>Cadastro de Autores</h1>
+            <h1>Bem vindo ao Sistema</h1>
           </div>
-          <AutorBox />
       </div>
     )
   }
@@ -758,5 +758,5 @@ class App extends Component {
 
 export default App;
 ````
-
-stop in 6.2 aplicando o history api.
+vamos usar o react-router e dele vamos extrarir *{ Router, Route , browserHistory}** isso para fazer a navegação com SPA (a troca de views sem atualizar a página) vamos usar também o *{Link}** que vai ser usado no lugar o <a> para isso onde temos *<a href="/rota">rota</a>** faremos *<Link to="/rota">Rota</Link>*
+rever aulas 6.1 6.2 6.3 e 8.1 - fazer resumo e ir para o próximo curso.
